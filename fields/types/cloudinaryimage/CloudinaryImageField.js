@@ -308,6 +308,7 @@ module.exports = Field.create({
 					className='ui-select2-cloudinary'
 					name={this.props.paths.select}
 					id={'field_' + this.props.paths.select}
+					cacheAsyncResults={false}
 					asyncOptions={getOptions}
 				/>
 			</div>

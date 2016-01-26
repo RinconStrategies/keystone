@@ -20,7 +20,7 @@ function cloudinaryimage(list, path, options) {
 
 	this._underscoreMethods = ['format'];
 	this._fixedSize = 'full';
-	this._properties = ['select', 'selectPrefix', 'autoCleanup', 'publicID', 'folder', 'filenameAsPublicID'];
+	this._properties = ['select', 'selectPrefix', 'autoCleanup', 'publicID', 'folder', 'filenameAsPublicID', 'uploadOptions'];
 
 	// TODO: implement filtering, usage disabled for now
 	options.nofilter = true;
@@ -75,6 +75,7 @@ cloudinaryimage.prototype.addToSchema = function() {
 		width: 			this._path.append('.width'),
 		height: 		this._path.append('.height'),
 		secure_url: 	this._path.append('.secure_url'),
+		upload_options: this._path.append('.upload_options'),
 		// virtuals
 		exists: 		this._path.append('.exists'),
 		folder: 		this._path.append('.folder'),
@@ -385,6 +386,12 @@ cloudinaryimage.prototype.getRequestHandler = function(item, req, paths, callbac
 			var uploadOptions = {
 				tags: [tp + field.list.path + '_' + field.path, tp + field.list.path + '_' + field.path + '_' + item.id]
 			};
+			
+			//merge user upload options
+			if (field.options.uploadOptions) {
+				uploadOptions = _.extend(uploadOptions,field.options.uploadOptions);
+			}
+		
 
 			if (keystone.get('cloudinary folders')) {
 				uploadOptions.folder = item.get(paths.folder);
