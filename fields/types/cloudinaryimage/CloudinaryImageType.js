@@ -190,7 +190,7 @@ cloudinaryimage.prototype.addToSchema = function() {
 			return src(this, options);
 		},
 		tag: function(options) {
-			return exists(this) ? cloudinary.image(this.get(field.path.public_id), options) : '';
+			return exists(this) ? cloudinary.image(this.get(field.path).public_id, options) : '';
 		},
 		scale: function(width, height, options) {
 			return src(this, addSize({ crop: 'scale' }, width, height, options));
