@@ -12,15 +12,15 @@ block js
 		Keystone.wysiwyg = { options: !{JSON.stringify(wysiwygOptions)} };
 		Keystone.itemId = '!{item.id}';
 	script.
-	        $(function(){
-                        $('form').submit(function (e) {
-	                        var dateTime = $('[name=publishedDate_date]').val() + ' ' + $('[name=publishedDate_time]').val();
-	                        var momentDate = moment(dateTime, 'YYYY-MM-DD hh:mm:ss a');
-	                        momentDate.add('minutes', momentDate.zone()); // Adjust for Timezone difference!
-	                        $('[name=publishedDate_date]').val(momentDate.format('YYYY-MM-DD'));
-	                        $('[name=publishedDate_time]').val(momentDate.format('h:mm:ss a'));
-	                });
-	        });
+		$(function(){
+			$('form').submit(function (e) {
+				var dateTime = $('[name=start_time_date]').val() + ' ' + $('[name=start_time_time]').val();
+				var momentDate = moment(dateTime, 'YYYY-MM-DD hh:mm:ss a');
+				momentDate.add('minutes', momentDate.zone()); // Adjust for Timezone difference!
+				$('[name=start_time_date]').val(momentDate.format('YYYY-MM-DD'));
+				$('[name=start_time_time]').val(momentDate.format('h:mm:ss a'));
+			});
+		})
 	script(src='/keystone/js/packages.js')
 	script(src='/keystone/js/fields.js')
 	script(src='/keystone/js/item.js')
