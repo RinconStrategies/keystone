@@ -3,7 +3,7 @@ var DateType = require('../date/DateType');
 var FieldType = require('../Type');
 var util = require('util');
 
-var parseFormats = ['YYYY-MM-DD', 'YYYY-MM-DD h:m:s a', 'YYYY-MM-DD h:m a', 'YYYY-MM-DD H:m:s', 'YYYY-MM-DD H:m'];
+var parseFormats = [moment.ISO_8601, 'YYYY-MM-DD', 'YYYY-MM-DD h:m:s a', 'YYYY-MM-DD h:m a', 'YYYY-MM-DD H:m:s', 'YYYY-MM-DD H:m', 'YYYY-MM-DD h:mm:s a Z'];
 
 /**
  * DateTime FieldType Constructor
@@ -25,7 +25,8 @@ function datetime(list, path, options) {
 	datetime.super_.call(this, list, path, options);
 	this.paths = {
 		date: this._path.append('_date'),
-		time: this._path.append('_time')
+		time: this._path.append('_time'),
+		tzOffset: this._path.append('_tzOffset'),
 	};
 }
 util.inherits(datetime, FieldType);
@@ -40,8 +41,15 @@ datetime.prototype.parse = DateType.prototype.parse;
  * Get the value from a data object; may be simple or a pair of fields
  */
 datetime.prototype.getInputFromData = function(data) {
+
+	var tzOffsetValue = data[this.paths.tzOffset];
+	
 	if (this.paths.date in data && this.paths.time in data) {
-		return (data[this.paths.date] + ' ' + data[this.paths.time]).trim();
+		var retval =  (data[this.paths.date] + ' ' + data[this.paths.time]).trim();
+		if (typeof tzOffsetValue !== 'undefined') {
+			retval += ' ' + tzOffsetValue;
+		}
+		return retval;
 	} else {
 		return data[this.path];
 	}
