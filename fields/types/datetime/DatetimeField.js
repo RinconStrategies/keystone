@@ -13,14 +13,17 @@ module.exports = Field.create({
 	// default input formats
 	dateInputFormat: 'YYYY-MM-DD',
 	timeInputFormat: 'h:mm:ss a',
+	tzOffsetInputFormat: 'Z',
 
 	// parse formats (duplicated from lib/fieldTypes/datetime.js)
 	parseFormats: ['YYYY-MM-DD', 'YYYY-MM-DD h:m:s a', 'YYYY-MM-DD h:m a', 'YYYY-MM-DD H:m:s', 'YYYY-MM-DD H:m'],
 
 	getInitialState: function() {
+	
 		return {
 			dateValue: this.props.value ? this.moment(this.props.value).format(this.dateInputFormat) : '',
-			timeValue: this.props.value ? this.moment(this.props.value).format(this.timeInputFormat) : ''
+			timeValue: this.props.value ? this.moment(this.props.value).format(this.timeInputFormat) : '',
+			tzOffsetValue: this.props.value ? this.moment(this.props.value).format(this.tzOffsetInputFormat) : moment().format(this.tzOffsetInputFormat),
 		};
 	},
 
@@ -47,9 +50,20 @@ module.exports = Field.create({
 		return value ? this.moment(value).format(format) : '';
 	},
 
-	handleChange: function(dateValue, timeValue) {
+	handleChange: function(dateValue, timeValue, tzOffsetValue) {
 		var value = dateValue + ' ' + timeValue;
 		var datetimeFormat = this.dateInputFormat + ' ' + this.timeInputFormat;
+
+		// if the change included a timezone offset, include that in the calculation (so NOW works correctly during DST changes)
+		if (typeof tzOffsetValue !== 'undefined') {
+			value += ' ' + tzOffsetValue;
+			datetimeFormat += ' ' + this.tzOffsetInputFormat;
+		}
+		// if not, calculate the timezone offset based on the date (respect different DST values)
+		else {
+			this.setState({ tzOffsetValue: moment(value, datetimeFormat).format(this.tzOffsetInputFormat) });
+		}
+		
 		this.props.onChange({
 			path: this.props.path,
 			value: this.isValid(value) ? moment(value, datetimeFormat).toISOString() : null
@@ -69,14 +83,18 @@ module.exports = Field.create({
 	setNow: function() {
 		var dateValue = moment().format(this.dateInputFormat);
 		var timeValue = moment().format(this.timeInputFormat);
+		var tzOffsetValue = moment().format(this.tzOffsetInputFormat);
+		
 		this.setState({
 			dateValue: dateValue,
-			timeValue: timeValue
+			timeValue: timeValue,
+			tzOffsetValue: tzOffsetValue
 		});
-		this.handleChange(dateValue, timeValue);
+		this.handleChange(dateValue, timeValue, tzOffsetValue);
 	},
 
 	renderUI: function() {
+		console.log("inside react keystone");
 		var input;
 		var fieldClassName = 'field-ui';
 		if (this.shouldRenderField()) {
@@ -98,6 +116,7 @@ module.exports = Field.create({
 			<div className="field field-type-datetime">
 				<label className="field-label">{this.props.label}</label>
 				{input}
+				<input type="hidden" name={this.props.paths.tzOffset} value={this.state.tzOffsetValue} />
 				<div className="col-sm-9 col-md-10 col-sm-offset-3 col-md-offset-2 field-note-wrapper">
 					<Note note={this.props.note} />
 				</div>
